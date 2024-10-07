@@ -82,6 +82,43 @@ public class AccountsServiceImpl implements IAccountsService{
         return AccountsMapper.mapToAccountsDto(customerAccount);
     }
 
+    @Override
+    public boolean updateCustomerandAccount(CustomerDto customerDto){
+        boolean isUpdated = false;
+        AccountsDto accountsDto = customerDto.getAccount();
+        if(accountsDto != null){
+            Accounts accounts = accountsRepository
+                .findById(accountsDto.getAccountNumber())
+                .orElseThrow(() -> new ResourceNotFoundException("Accounts", "Account Number", String.valueOf(accountsDto.getAccountNumber())));
+            AccountsMapper.mapToAccounts(accountsDto, accounts);
+            accounts.setUpdatedBy(customerDto.getName());
+            accounts.setUpdatedAt(LocalDateTime.now());
+            accounts = accountsRepository.save(accounts);
+
+            Long customerId = accounts.getCustomerId();
+            Customer customer = customerRepository
+                .findById(customerId)
+                .orElseThrow(() -> new ResourceNotFoundException("Customer", "Customer ID", String.valueOf(customerId)));
+            CustomerMapper.mapToCustomer(customerDto, customer);
+            customer.setUpdatedBy(customerDto.getName());
+            customer.setUpdatedAt(LocalDateTime.now());
+            customerRepository.save(customer);
+            isUpdated = true;
+        }
+        return isUpdated;
+    }
+
+    @Override
+    public boolean deleteCustomerByMobileNumber(String mobileNumber){
+        Optional<Customer> customer = customerRepository.findByMobileNumber(mobileNumber);
+        if(customer.isEmpty()){
+            return false;
+        }
+        Long finalCustomer = customer.get().getCustomerId();
+        customerRepository.deleteById(finalCustomer);
+        accountsRepository.deleteByCustomerId(finalCustomer);
+        return true;
+    }
     public Accounts createNewAccounts(Customer customer) {
         Accounts accounts = new Accounts();
         accounts.setCustomerId(customer.getCustomerId());

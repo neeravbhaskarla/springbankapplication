@@ -55,4 +55,42 @@ public class AccountsController {
             .status(HttpStatus.FOUND)
             .body(account);
     }
+
+    @PutMapping("/update")
+    public ResponseEntity<ResponseDto> updateCustomerandAccounts(@RequestBody CustomerDto updatedCustomer){
+        boolean isUpdated = accountsService.updateCustomerandAccount(updatedCustomer);
+        if(isUpdated){
+            return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(new ResponseDto(
+                        AccountConstants.STATUS_200,
+                        AccountConstants.MESSAGE_200));
+        }
+        else{
+            return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(new ResponseDto(
+                    AccountConstants.STATUS_500,
+                    AccountConstants.MESSAGE_500));
+        }
+    }
+
+    @DeleteMapping("/delete")
+    public ResponseEntity<ResponseDto> deleteByCustomerId(@RequestParam String mobileNumber){
+        boolean isDeleted = accountsService.deleteCustomerByMobileNumber(mobileNumber);
+        if(isDeleted){
+            return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(new ResponseDto(
+                    AccountConstants.STATUS_200,
+                    AccountConstants.MESSAGE_200));
+        }
+        else{
+            return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(new ResponseDto(
+                    AccountConstants.STATUS_500,
+                    AccountConstants.MESSAGE_500));
+        }
+    }
 }

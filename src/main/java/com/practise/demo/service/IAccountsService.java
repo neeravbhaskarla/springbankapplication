@@ -14,4 +14,8 @@ public interface IAccountsService {
 
     AccountsDto getAccountDetailsByCustomerName(String name);
 
+    boolean updateCustomerandAccount(CustomerDto customerDto);
+
+    boolean deleteCustomerByMobileNumber(String mobileNumber);
+
 }
