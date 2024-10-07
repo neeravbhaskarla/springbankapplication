@@ -22,25 +22,16 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<ErrorResponseDto>(errorResponseDto, HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(CustomerNameNotExistsException.class)
-    public ResponseEntity<ErrorResponseDto> customerNameNotExistsException(CustomerNameNotExistsException exception, WebRequest webRequest){
-        ErrorResponseDto errorResponseDto = new ErrorResponseDto(
-            webRequest.getDescription(false),
-            HttpStatus.BAD_REQUEST,
-            exception.getMessage(),
-            LocalDateTime.now()
-        );
-        return new ResponseEntity<ErrorResponseDto>(errorResponseDto, HttpStatus.BAD_REQUEST);
-    }
-
-    @ExceptionHandler(CustomerIdNotFoundException.class)
-    public ResponseEntity<ErrorResponseDto> customerIdNotFoundException(CustomerIdNotFoundException exception, WebRequest webRequest){
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<ErrorResponseDto> resourceNotFoundExceptionHandler(ResourceNotFoundException exception, WebRequest webRequest){
         ErrorResponseDto errorResponseDto = new ErrorResponseDto(
             webRequest.getDescription(false),
             HttpStatus.NOT_FOUND,
             exception.getMessage(),
             LocalDateTime.now()
         );
-        return new ResponseEntity<ErrorResponseDto>(errorResponseDto, HttpStatus.NOT_FOUND);
+        return ResponseEntity
+            .status(HttpStatus.NOT_FOUND)
+            .body(errorResponseDto);
     }
 }

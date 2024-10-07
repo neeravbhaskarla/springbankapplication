@@ -4,8 +4,7 @@ import com.practise.demo.constants.AccountConstants;
 import com.practise.demo.dto.AccountsDto;
 import com.practise.demo.dto.CustomerDto;
 import com.practise.demo.exceptions.CustomerAlreadyExistsException;
-import com.practise.demo.exceptions.CustomerIdNotFoundException;
-import com.practise.demo.exceptions.CustomerNameNotExistsException;
+import com.practise.demo.exceptions.ResourceNotFoundException;
 import com.practise.demo.mappers.AccountsMapper;
 import com.practise.demo.mappers.CustomerMapper;
 import com.practise.demo.model.Accounts;
@@ -19,7 +18,6 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.Random;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 @Service
 @AllArgsConstructor
@@ -53,11 +51,11 @@ public class AccountsServiceImpl implements IAccountsService{
     @Override
     public CustomerDto getCustomerByPhoneNumber(String mobileNumber){
         Customer customer = customerRepository.findByMobileNumber(mobileNumber)
-            .orElseThrow(() -> new CustomerNameNotExistsException("Mobile Number don't exists"));
+            .orElseThrow(() -> new ResourceNotFoundException("Customer", "Mobile number", mobileNumber));
 
         AccountsDto account = accountsRepository.findByCustomerId(customer.getCustomerId())
             .map(AccountsMapper::mapToAccountsDto)
-            .orElseThrow(() -> new CustomerNameNotExistsException("Account not found"));
+            .orElseThrow(() -> new ResourceNotFoundException("Accounts", "Customer ID", String.valueOf(customer.getCustomerId())));
 
         CustomerDto customerDto = CustomerMapper.mapToCustomerDto(customer);
         customerDto.setAccount(account);
@@ -74,12 +72,12 @@ public class AccountsServiceImpl implements IAccountsService{
     public AccountsDto getAccountDetailsByCustomerName(String name) {
         Optional<Customer> customer = customerRepository.findByName(name);
         if(customer.isEmpty()){
-            throw new CustomerNameNotExistsException("Customer name "+name+" don't exists");
+            throw new ResourceNotFoundException("Customer", "Customer name", name);
         }
 
         Accounts customerAccount = accountsRepository
             .findByCustomerId(customer.get().getCustomerId())
-            .orElseThrow(() -> new CustomerIdNotFoundException("Customer ID for the given customer name "+name+"is not found"));
+            .orElseThrow(() -> new ResourceNotFoundException("Accounts", "CustomerId", String.valueOf(customer.get().getCustomerId())));
 
         return AccountsMapper.mapToAccountsDto(customerAccount);
     }
