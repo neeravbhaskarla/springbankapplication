@@ -1,13 +1,11 @@
 package com.practise.demo.controller;
 
 import com.practise.demo.constants.AccountConstants;
+import com.practise.demo.dto.AccountsDto;
 import com.practise.demo.dto.CustomerDto;
 import com.practise.demo.dto.ResponseDto;
-import com.practise.demo.model.Accounts;
-import com.practise.demo.model.Customer;
 import com.practise.demo.service.IAccountsService;
 import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -28,24 +26,31 @@ public class AccountsController {
     }
 
     @GetMapping("/customers")
-    public ResponseEntity<Iterable<Customer>> getAllCustomers(){
-        Iterable<Customer> customers = accountsService.getAllCustomers();
+    public ResponseEntity<Iterable<CustomerDto>> getAllCustomers(){
+        Iterable<CustomerDto> customers = accountsService.getAllCustomers();
         return ResponseEntity
             .status(HttpStatus.FOUND)
             .body(customers);
     }
 
+    @GetMapping("/customers/{mobileNumber}")
+    public ResponseEntity<CustomerDto> getCustomerByPhoneNumber(@PathVariable String mobileNumber){
+        return ResponseEntity
+            .status(HttpStatus.FOUND)
+            .body(accountsService.getCustomerByPhoneNumber(mobileNumber));
+    }
+
     @GetMapping("/accounts")
-    public ResponseEntity<Iterable<Accounts>> getAllAccounts(){
-        Iterable<Accounts> accounts = accountsService.getAllAccounts();
+    public ResponseEntity<Iterable<AccountsDto>> getAllAccounts(){
+        Iterable<AccountsDto> accounts = accountsService.getAllAccounts();
         return ResponseEntity
             .status(HttpStatus.FOUND)
             .body(accounts);
     }
 
     @GetMapping("/accounts/{customerName}")
-    public ResponseEntity<Accounts> getAccountByCustomerName(@PathVariable String customerName){
-        Accounts account = accountsService.getAccountDetailsByCustomerName(customerName);
+    public ResponseEntity<AccountsDto> getAccountByCustomerName(@PathVariable String customerName){
+        AccountsDto account = accountsService.getAccountDetailsByCustomerName(customerName);
         return ResponseEntity
             .status(HttpStatus.FOUND)
             .body(account);

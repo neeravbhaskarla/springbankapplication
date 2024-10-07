@@ -2,16 +2,16 @@ package com.practise.demo.service;
 
 import com.practise.demo.dto.AccountsDto;
 import com.practise.demo.dto.CustomerDto;
-import com.practise.demo.model.Accounts;
-import com.practise.demo.model.Customer;
 
 public interface IAccountsService {
     void createAccount(CustomerDto customerDto);
 
-    Iterable<Customer> getAllCustomers();
+    Iterable<CustomerDto> getAllCustomers();
 
-    Iterable<Accounts> getAllAccounts();
+    CustomerDto getCustomerByPhoneNumber(String phoneNumber);
 
-    Accounts getAccountDetailsByCustomerName(String name);
+    Iterable<AccountsDto> getAllAccounts();
+
+    AccountsDto getAccountDetailsByCustomerName(String name);
 
 }

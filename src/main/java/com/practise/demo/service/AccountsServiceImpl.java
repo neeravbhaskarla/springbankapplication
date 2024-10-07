@@ -1,10 +1,12 @@
 package com.practise.demo.service;
 
 import com.practise.demo.constants.AccountConstants;
+import com.practise.demo.dto.AccountsDto;
 import com.practise.demo.dto.CustomerDto;
 import com.practise.demo.exceptions.CustomerAlreadyExistsException;
 import com.practise.demo.exceptions.CustomerIdNotFoundException;
 import com.practise.demo.exceptions.CustomerNameNotExistsException;
+import com.practise.demo.mappers.AccountsMapper;
 import com.practise.demo.mappers.CustomerMapper;
 import com.practise.demo.model.Accounts;
 import com.practise.demo.model.Customer;
@@ -16,6 +18,8 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.Random;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 @Service
 @AllArgsConstructor
@@ -25,7 +29,7 @@ public class AccountsServiceImpl implements IAccountsService{
 
     @Override
     public void createAccount(CustomerDto customerDto) {
-        Customer customer = CustomerMapper.mapToCustomer(customerDto, new Customer());
+        Customer customer = CustomerMapper.mapToCustomer(customerDto);
         Optional<Customer> optionalCustomer = customerRepository.findByMobileNumber(customer.getMobileNumber());
 
         if(optionalCustomer.isPresent()){
@@ -40,29 +44,44 @@ public class AccountsServiceImpl implements IAccountsService{
     }
 
     @Override
-    public Iterable<Customer> getAllCustomers() {
-        return customerRepository.findAll();
+    public Iterable<CustomerDto> getAllCustomers() {
+        return customerRepository.findAll().stream()
+            .map(CustomerMapper::mapToCustomerDto)
+            .collect(Collectors.toList());
     }
 
     @Override
-    public Iterable<Accounts> getAllAccounts() {
-        return accountsRepository.findAll();
+    public CustomerDto getCustomerByPhoneNumber(String mobileNumber){
+        Customer customer = customerRepository.findByMobileNumber(mobileNumber)
+            .orElseThrow(() -> new CustomerNameNotExistsException("Mobile Number don't exists"));
+
+        AccountsDto account = accountsRepository.findByCustomerId(customer.getCustomerId())
+            .map(AccountsMapper::mapToAccountsDto)
+            .orElseThrow(() -> new CustomerNameNotExistsException("Account not found"));
+
+        CustomerDto customerDto = CustomerMapper.mapToCustomerDto(customer);
+        customerDto.setAccount(account);
+        return customerDto;
+    }
+    @Override
+    public Iterable<AccountsDto> getAllAccounts() {
+        return accountsRepository.findAll().stream()
+            .map(AccountsMapper::mapToAccountsDto)
+            .collect(Collectors.toList());
     }
 
     @Override
-    public Accounts getAccountDetailsByCustomerName(String name) {
+    public AccountsDto getAccountDetailsByCustomerName(String name) {
         Optional<Customer> customer = customerRepository.findByName(name);
         if(customer.isEmpty()){
             throw new CustomerNameNotExistsException("Customer name "+name+" don't exists");
         }
-        Optional<Accounts> customerAccount = accountsRepository.findByCustomerId(customer.get().getCustomerId());
 
-        if(customerAccount.isPresent()){
-            return customerAccount.get();
-        }
-        else{
-            throw new CustomerIdNotFoundException("Customer ID for the given customer name "+name+"is not found");
-        }
+        Accounts customerAccount = accountsRepository
+            .findByCustomerId(customer.get().getCustomerId())
+            .orElseThrow(() -> new CustomerIdNotFoundException("Customer ID for the given customer name "+name+"is not found"));
+
+        return AccountsMapper.mapToAccountsDto(customerAccount);
     }
 
     public Accounts createNewAccounts(Customer customer) {
